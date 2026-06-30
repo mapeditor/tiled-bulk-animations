@@ -1,0 +1,4 @@
+echo "Running TypeScript compiler..."
+bun run --bun tsc --noEmit
+echo "Running unit tests..."
+bun test

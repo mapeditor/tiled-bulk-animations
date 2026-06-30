@@ -1,33 +1,65 @@
-## Bulk Animations Extension for [Tiled Map Editor](https://www.mapeditor.org/)
+# Bulk Animation Editor
 
-This extension allows quickly animating an entire group of tiles in a tileset image, so long as the animation frames
-are arranged consistently (subsequent frames located directly to the right or below the initial frames for each tile).
+A [Tiled Map Editor](https://www.mapeditor.org/) extension for creating animations across multiple tiles at once.
 
-Here is a demo of this extension being used to animate ocean waves:
+![Demo](demo.gif)
 
-![Demo](https://github.com/sergkr/tiled-bulk-animations/raw/master/demo.gif)
+## How It Works
 
-The sample tileset used in the above demo is available on opengameart.org:
+Select a group of tiles in your tileset where the first frame of each animation sits in a contiguous rectangular region. The extension automatically detects the layout and generates frame sequences in the direction you specify.
 
-https://opengameart.org/content/animated-ocean-tileset
+Supports three animation directions:
+- **Right**: subsequent frames are to the right of the selection
+- **Down**: subsequent frames are below the selection
+- **Both**: frames progress right then wrap to the next row (grid order)
 
-Credit to Leonard Pabin aka (Len) and Zachariah Husiar aka (Zabin) for the artwork.
+## Installation
 
-### Installation
+1. Download [`bulk-animations.zip`](https://github.com/Lillious-Networks/tiled-bulk-animations/releases/latest) from the latest release.
+2. Extract and place the `bulk-animations` folder into Tiled's extensions directory.
 
-1. Navigate to the [Releases](https://github.com/sergkr/tiled-bulk-animations/releases) in this repository and download
-`bulk-animations.zip` from the latest release.
-2. Extract the contents and place the `bulk-animations` directory into the extensions directory of Tiled Map Editor.
-* The extensions directory depends on your operating system. You can open the extensions directory from Tiled by going to **Edit 
-→ Preferences**, then switching to the **Plugins** tab and clicking on **Open** in the **Extensions** section.
-* Or you can refer to the list below:
+| Platform | Extensions Directory |
+|----------|---------------------|
+| Windows  | `%USERPROFILE%/AppData/Local/Tiled/extensions/` |
+| macOS    | `~/Library/Preferences/Tiled/extensions/` |
+| Linux    | `~/.config/tiled/extensions/` |
 
-Platform | Location
------------- | -------------
-Windows | `C:/Users/<USER>/AppData/Local/Tiled/extensions/`
-MacOS | `~/Library/Preferences/Tiled/extensions/`
-Linux | `~/.config/tiled/extensions/`
+> You can also open the directory from Tiled: **Edit → Preferences → Plugins → Open** (Extensions section).
 
-Tiled should automatically detect and load the plugin without having to restart the editor.
+## Usage
 
-Once the extension is saved, the new menu entries should be available in the **Tileset** menu when editing a tileset (.tsx).
+1. Open a tileset (`.tsx`) in Tiled.
+2. Select the tiles containing the *first frame* of each animation you want to create.
+3. Go to **Tileset → Create Animation From Selection**.
+4. Choose the animation **direction**, number of **frames** per animation, and **frame duration**.
+5. Click **OK**.
+
+Stride (the number of tiles between consecutive frames) is automatically derived from your selection size.
+
+To remove animations, select the tiles and use **Tileset → Clear Animations In Selection**.
+
+## Development
+
+Requires [Bun](https://bun.sh/).
+
+```sh
+bun install
+```
+
+### Build
+
+```sh
+bun run build
+```
+
+The output lands in `dist/bulk-animations/`. Copy that folder into Tiled's extensions directory to use the extension.
+
+### Tests
+
+```sh
+bun test
+```
+
+### Debug Logging
+
+Set `config.debug` to `true` in `src/index.ts` to enable debug output. Messages appear in Tiled's console (**View → Views and Toolbars → Console**). Set it back to `false` before building a release.
