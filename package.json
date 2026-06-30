@@ -5,7 +5,8 @@
   "private": true,
   "devDependencies": {
     "@types/bun": "latest",
-    "husky": "^9.1.7"
+    "husky": "^9.1.7",
+    "@mapeditor/tiled-api": "^1.11.0"
   },
   "peerDependencies": {
     "typescript": "^5"
