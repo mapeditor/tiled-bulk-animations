@@ -47,13 +47,19 @@ export function makeTilesetDimensions(cols: number, rows: number, tw = 16, th = 
     };
 }
 
+export function makeTilesetAsset(cols: number, rows: number, tw = 16, th = 16, sp = 0, m = 0): any {
+    return {
+        imageWidth: cols * tw + (cols - 1) * sp + 2 * m,
+        imageHeight: rows * th + (rows - 1) * sp + 2 * m,
+        tileWidth: tw,
+        tileHeight: th,
+        tileSpacing: sp,
+        margin: m,
+    };
+}
+
 let _mod: any = null;
 export async function getIndexModule() {
     if (!_mod) _mod = await import("../index");
     return _mod;
-}
-
-export async function setActiveAsset(asset: any) {
-    const mod = await getIndexModule();
-    mod._setActiveAsset(asset);
 }

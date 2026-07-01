@@ -6,21 +6,15 @@ const config : IConfig =  {
     debug: false
 };
 
-// The tileset currently being edited
-let active_asset: Tileset;
-
-// Connect to 'activeAssetChanged' signal to update active_asset value when asset is changed.
+// When a tileset becomes active, reset its selected tiles: Tiled keeps the
+// selection from the previously opened tileset, which is a stale reference.
 tiled.activeAssetChanged.connect((asset) => {
     // We only care about tilesets in this scenerio
     if (!asset?.isTileset) {
         return;
     }
 
-    active_asset = asset as Tileset;
-
-    // Reset selected tiles because Tiled stores this value from the last opened tileset
-    // Which creates a stale reference
-    active_asset.selectedTiles = [];
+    (asset as Tileset).selectedTiles = [];
 });
 
 const action_animation_create = tiled.registerAction(`${config.name}_CreateFromSelection`,
@@ -33,21 +27,21 @@ const action_animation_clear = tiled.registerAction(`${config.name}_ClearFromSel
     action_animation_clear.text = "Clear Animations From Selection";
     action_animation_clear.icon = "images/icon-clear.png";
 
-export function tileset_selection (selected_tiles: Tile[]) {
+export function tileset_selection (tileset: Tileset, selected_tiles: Tile[]) {
     // Create structured object for organization and better
     // visibility into what's needed in the object
     const tileset_dimensions : ITilesetDimensions = {
         image: {
-            width: active_asset.imageWidth,
-            height: active_asset.imageHeight
+            width: tileset.imageWidth,
+            height: tileset.imageHeight
         },
         tileset: {
             tile: {
-                width: active_asset.tileWidth,
-                height: active_asset.tileHeight,
-                spacing: active_asset.tileSpacing
+                width: tileset.tileWidth,
+                height: tileset.tileHeight,
+                spacing: tileset.tileSpacing
             },
-            margin: active_asset.margin,
+            margin: tileset.margin,
             rows: 0,
             columns: 0
         }
@@ -87,8 +81,14 @@ export function tileset_selection (selected_tiles: Tile[]) {
 }
 
 function animation_create () {
+    const tileset = tiled.activeAsset as Tileset;
+    if (!tileset?.isTileset) {
+        tiled.alert("No tileset is active");
+        return;
+    }
+
     // Ensure that there are tiles selected to operate on
-    const selected_tile_count = active_asset.selectedTiles.length > 0 ? active_asset.selectedTiles: 0;
+    const selected_tile_count = tileset.selectedTiles.length > 0 ? tileset.selectedTiles: 0;
     if (!selected_tile_count) {
         tiled.alert("No tiles selected");
         return;
@@ -97,7 +97,7 @@ function animation_create () {
     debug(`Selected tiles: ${selected_tile_count.length}`);
 
     // Sort existing tiles
-    const selected_tiles = active_asset.selectedTiles.slice().sort((a, b) => a.id - b.id);
+    const selected_tiles = tileset.selectedTiles.slice().sort((a, b) => a.id - b.id);
 
     // Check if the selected tiles have existing animations
     const selected_animated_tiles = selected_tiles.filter(tile => tile.frames?.length > 0);
@@ -111,7 +111,7 @@ function animation_create () {
         if (!response) { return; } else { debug(`Overwriting ${selected_animated_tile_count.length} tile(s)`) }
     }
 
-    const _tileset_selection = tileset_selection(selected_tiles)
+    const _tileset_selection = tileset_selection(tileset, selected_tiles)
     const tileset_selected_tiles = _tileset_selection[0] as rect;
     const tileset_dimensions = _tileset_selection[1] as ITilesetDimensions;
 
@@ -130,7 +130,7 @@ function animation_create () {
             tiled.alert("No direction selected. (This should not occur)");
             return;
         }
-        active_asset.macro("Create Animations (Bulk)", () => {
+        tileset.macro("Create Animations (Bulk)", () => {
             for (const tile of selected_tiles) {
                 const tile_frames = get_tile_frames(tile, frame_count, duration, direction, tileset_selected_tiles, tileset_dimensions);
                 if (!tile_frames) return;
@@ -157,15 +157,21 @@ export function get_tile_frames(tile: Tile, frame_count: number, duration: numbe
 }
 
 function animation_clear () {
+    const tileset = tiled.activeAsset as Tileset;
+    if (!tileset?.isTileset) {
+        tiled.alert("No tileset is active");
+        return;
+    }
+
     // Ensure that there are tiles selected to operate on
-    const selected_tile_count = active_asset.selectedTiles.length > 0 ? active_asset.selectedTiles: 0;
+    const selected_tile_count = tileset.selectedTiles.length > 0 ? tileset.selectedTiles: 0;
     if (!selected_tile_count) {
         tiled.alert("No tiles selected");
         return;
     }
 
     // Sort existing tiles
-    const selected_tiles = active_asset.selectedTiles.slice().sort((a, b) => a.id - b.id);
+    const selected_tiles = tileset.selectedTiles.slice().sort((a, b) => a.id - b.id);
 
     // Check if the selected tiles have existing animations
     const selected_animated_tiles = selected_tiles.filter(tile => tile.frames?.length > 0);
@@ -180,7 +186,7 @@ function animation_clear () {
     }
 
     // Clear animation frames
-    active_asset.macro("Clear Animations", () => {
+    tileset.macro("Clear Animations", () => {
         selected_animated_tiles.forEach(tile => {
             tile.frames = [];
         });
@@ -237,8 +243,4 @@ function debug(message: string) {
     if (config.debug) {
         tiled.log(`[DEBUG]: ${message}`);
     }
-}
-
-export function _setActiveAsset(asset: Tileset) {
-    active_asset = asset;
 }
