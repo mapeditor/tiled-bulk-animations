@@ -104,11 +104,6 @@ function animation_create () {
     const tileset_selected_tiles = _tileset_selection[0] as rect;
     const tileset_dimensions = _tileset_selection[1] as ITilesetDimensions;
 
-    if (selected_tiles.length !== tileset_selected_tiles.width * tileset_selected_tiles.height) {
-        tiled.alert("Selection must be a rectangular region");
-        return;
-    }
-
     const dialog = dialog_create(config.title, 400);
     const result = animation_dialog_create(dialog);
     result.confirmation_button.clicked.connect(() => {
@@ -137,14 +132,41 @@ function animation_create () {
 
 export function get_tile_frames(tile: Tile, frame_count: number, duration: number, direction: string, tileset_selected_tiles: rect, tile_dimensions: ITilesetDimensions, stride?: IStride) {
     const st = stride || { horizontal: 0, vertical: 0 };
+    const columns = tile_dimensions.tileset.columns;
+    const max_tiles = columns * tile_dimensions.tileset.rows;
+
+    if (direction === "Both") {
+        const h_advance = tileset_selected_tiles.width + st.horizontal;
+        const v_advance = tileset_selected_tiles.height + st.vertical;
+        const cells_per_row = 1 + Math.floor((columns - tileset_selected_tiles.x - tileset_selected_tiles.width) / h_advance);
+        const tile_col = tile.id % columns;
+        const tile_row = Math.floor(tile.id / columns);
+        const col_offset = tile_col - tileset_selected_tiles.x;
+        const row_offset = tile_row - tileset_selected_tiles.y;
+
+        if (frame_count > 0) {
+            const last_cell_col = (frame_count - 1) % cells_per_row;
+            const last_cell_row = Math.floor((frame_count - 1) / cells_per_row);
+            const last_tc = tileset_selected_tiles.x + last_cell_col * h_advance + col_offset;
+            const last_tr = tileset_selected_tiles.y + last_cell_row * v_advance + row_offset;
+            if (last_tr * columns + last_tc >= max_tiles) return null;
+        }
+
+        const frames: frame[] = [];
+        for (let i = 0; i < frame_count; i++) {
+            const cell_col = i % cells_per_row;
+            const cell_row = Math.floor(i / cells_per_row);
+            const tc = tileset_selected_tiles.x + cell_col * h_advance + col_offset;
+            const tr = tileset_selected_tiles.y + cell_row * v_advance + row_offset;
+            frames.push({ tileId: tr * columns + tc, duration });
+        }
+        return frames;
+    }
 
     const stride_value = direction === "Down"
-        ? tile_dimensions.tileset.columns * tileset_selected_tiles.height + st.vertical
-        : direction === "Both"
-            ? tileset_selected_tiles.width + tile_dimensions.tileset.columns * tileset_selected_tiles.height + st.horizontal + st.vertical
-            : tileset_selected_tiles.width + st.horizontal;
+        ? columns * tileset_selected_tiles.height + st.vertical
+        : tileset_selected_tiles.width + st.horizontal;
 
-    const max_tiles = tile_dimensions.tileset.columns * tile_dimensions.tileset.rows;
     const last_tile_id = tile.id + (frame_count - 1) * stride_value;
     if (frame_count > 0 && last_tile_id >= max_tiles) return null;
 

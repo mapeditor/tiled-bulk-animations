@@ -27,8 +27,8 @@ test("Both stride adds horizontal + vertical stride", async () => {
     const frames = get_tile_frames(tile, 3, 100, "Both", makeRect(2, 1, 3, 2), makeTilesetDimensions(10, 15), makeStride(1, 10));
     expect(frames).toHaveLength(3);
     expect(frames[0]).toEqual({ tileId: 12, duration: 100 });
-    expect(frames[1]).toEqual({ tileId: 46, duration: 100 });
-    expect(frames[2]).toEqual({ tileId: 80, duration: 100 });
+    expect(frames[1]).toEqual({ tileId: 16, duration: 100 });
+    expect(frames[2]).toEqual({ tileId: 132, duration: 100 });
 });
 
 test("Zero stride produces same results as no stride", async () => {

@@ -30,6 +30,9 @@
     addButton(_text: string) {
         return { clicked: { connect: () => {} } };
     }
+    addSeparator(_text?: string) {}
+    addNewRow() {}
+    addHeading(_text: string, _wordWrap?: boolean) {}
 };
 
 export function makeTile(id: number): any {
