@@ -1,6 +1,3 @@
-import cacheservice from "./cache"
-const cache = new(cacheservice);
-
 // Global Config
 const config : IConfig =  {
     name: "BulkAnimationEditor",
@@ -9,7 +6,7 @@ const config : IConfig =  {
     debug: false
 };
 
-// Cache active asset if it exists
+// The tileset currently being edited
 let active_asset: Tileset;
 
 // Connect to 'activeAssetChanged' signal to update active_asset value when asset is changed.
@@ -19,31 +16,11 @@ tiled.activeAssetChanged.connect((asset) => {
         return;
     }
 
-    const cache_hit = cache.get((asset as Tileset).name);
-    active_asset = cache_hit ?? (asset as Tileset);
+    active_asset = asset as Tileset;
 
     // Reset selected tiles because Tiled stores this value from the last opened tileset
     // Which creates a stale reference
     active_asset.selectedTiles = [];
-
-    if (cache_hit && active_asset) {
-        return;
-    }
-
-    // Add the new tileset to cache
-    cache.add(active_asset.name, active_asset);
-
-    debug(`Caching ${active_asset.name}`);
-
-    // Set up a listener to refresh the cache when a tileset is modified
-    active_asset.modifiedChanged.connect(() => {
-        // We only care if modified is true
-        if (active_asset?.modified) {
-            debug(`${active_asset.name} was modified - recaching`);
-            cache.remove(active_asset.name);
-            cache.add(active_asset.name, active_asset);
-        }
-    });
 });
 
 const action_animation_create = tiled.registerAction(`${config.name}_CreateFromSelection`,

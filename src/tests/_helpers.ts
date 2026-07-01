@@ -32,15 +32,6 @@
     }
 };
 
-export function mockAsset(name: string) {
-    let cb: ((newName: string) => void) | null = null;
-    return {
-        name,
-        fileNameChanged: { connect: (c: (newName: string) => void) => { cb = c; } },
-        _fireFileNameChanged(newName: string) { cb?.(newName); },
-    };
-}
-
 export function makeTile(id: number): any {
     return { id };
 }

@@ -7,7 +7,6 @@ performance.mark("start-build");
 const output_location = `./dist/bulk-animations/`;
 
 const results = await Promise.all([
-    transpile(`./src/cache.ts`, `${output_location}cache.mjs`),
     transpile(`./src/index.ts`, `${output_location}index.mjs`), // Module
 ]);
 

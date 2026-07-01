@@ -19,12 +19,6 @@ declare interface IConfig {
     debug?: boolean
 }
 
-declare interface ICacheService {
-  add(key: string, asset: Asset): void;
-  get(key: string): Tileset | null;
-  remove(key: string): void;
-}
-
 declare interface ITilesetDimensions {
     image: {
         width: number;

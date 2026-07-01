@@ -14,6 +14,6 @@
   "scripts": {
     "prepare": "husky",
     "build": "bun ./src/utility/build.ts && bun minify",
-    "minify": "bun build --minify ./dist/bulk-animations/index.mjs --outfile=./dist/bulk-animations/index.mjs && bun build --minify ./dist/bulk-animations/cache.mjs --outfile=./dist/bulk-animations/cache.mjs"
+    "minify": "bun build --minify ./dist/bulk-animations/index.mjs --outfile=./dist/bulk-animations/index.mjs"
   }
 }
