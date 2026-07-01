@@ -36,9 +36,16 @@ declare interface ITilesetDimensions {
     }
 }
 
+declare interface IStride {
+    horizontal: number;
+    vertical: number;
+}
+
 declare interface IAnimationConfirmation {
     confirmation_button: Qt.QPushButton;
     animation_frames_input: Qt.QDoubleSpinBox;
     animation_frame_duration: Qt.QDoubleSpinBox;
     animation_direction: Qt.QComboBox;
+    animation_stride_horizontal: Qt.QDoubleSpinBox;
+    animation_stride_vertical: Qt.QDoubleSpinBox;
 }

@@ -29,18 +29,19 @@ Supports three animation directions:
 ## Usage
 
 1. Open a tileset (`.tsx`) in Tiled.
-2. Select the tiles containing the *first frame* of each animation you want to create.
-3. Go to **Tileset → Create Animation From Selection**.
-4. Choose the animation **direction**, number of **frames** per animation, and **frame duration**.
-5. Click **OK**.
+2. Select the tiles containing the *first frame* of each animation you want to create. The selection must be a contiguous rectangular region.
+3. Go to **Tileset → Create Animations From Selection**.
+4. Choose the animation **direction** (Right, Down, or Both), number of **frames**, and **frame duration**.
+5. Optionally add extra **Horizontal Stride** and/or **Vertical Stride** to account for gaps between animation frames in your sprite sheet.
+6. Click **Confirm**.
 
-Stride (the number of tiles between consecutive frames) is automatically derived from your selection size.
+The base stride is automatically derived from your selection dimensions and the chosen direction. The Horizontal/Vertical stride values add to this base calculation.
 
-To remove animations, select the tiles and use **Tileset → Clear Animations In Selection**.
+To remove animations, select the tiles and use **Tileset → Clear Animations From Selection**.
 
 ## Development
 
-Requires [Bun](https://bun.sh/).
+Written in TypeScript. Requires [Bun](https://bun.sh/).
 
 ```sh
 bun install

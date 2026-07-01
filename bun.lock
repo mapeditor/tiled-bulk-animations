@@ -4,10 +4,8 @@
   "workspaces": {
     "": {
       "name": "tiled-bulk-animations",
-      "dependencies": {
-        "@mapeditor/tiled-api": "^1.11.0",
-      },
       "devDependencies": {
+        "@mapeditor/tiled-api": "^1.11.0",
         "@types/bun": "latest",
         "husky": "^9.1.7",
       },

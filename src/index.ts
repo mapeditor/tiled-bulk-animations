@@ -6,17 +6,6 @@ const config : IConfig =  {
     debug: false
 };
 
-// When a tileset becomes active, reset its selected tiles: Tiled keeps the
-// selection from the previously opened tileset, which is a stale reference.
-tiled.activeAssetChanged.connect((asset) => {
-    // We only care about tilesets in this scenerio
-    if (!asset?.isTileset) {
-        return;
-    }
-
-    (asset as Tileset).selectedTiles = [];
-});
-
 const action_animation_create = tiled.registerAction(`${config.name}_CreateFromSelection`,
     action => animation_create());
     action_animation_create.text = "Create Animations From Selection";
@@ -126,13 +115,17 @@ function animation_create () {
         const duration = result.animation_frame_duration.value;
         const frame_count = result.animation_frames_input.value;
         const direction = ["Right", "Down", "Both"][result.animation_direction.currentIndex];
+        const stride: IStride = {
+            horizontal: result.animation_stride_horizontal.value,
+            vertical: result.animation_stride_vertical.value
+        };
         if (!direction) {
             tiled.alert("No direction selected. (This should not occur)");
             return;
         }
         tileset.macro("Create Animations (Bulk)", () => {
             for (const tile of selected_tiles) {
-                const tile_frames = get_tile_frames(tile, frame_count, duration, direction, tileset_selected_tiles, tileset_dimensions);
+                const tile_frames = get_tile_frames(tile, frame_count, duration, direction, tileset_selected_tiles, tileset_dimensions, stride);
                 if (!tile_frames) return;
                     tile.frames = tile_frames;
             }
@@ -142,16 +135,22 @@ function animation_create () {
     });
 }
 
-export function get_tile_frames(tile: Tile, frame_count: number, duration: number, direction: string, tileset_selected_tiles: rect, tile_dimensions: ITilesetDimensions) {
-    const stride = direction === "Down"
-        ? tile_dimensions.tileset.columns * tileset_selected_tiles.height
+export function get_tile_frames(tile: Tile, frame_count: number, duration: number, direction: string, tileset_selected_tiles: rect, tile_dimensions: ITilesetDimensions, stride?: IStride) {
+    const st = stride || { horizontal: 0, vertical: 0 };
+
+    const stride_value = direction === "Down"
+        ? tile_dimensions.tileset.columns * tileset_selected_tiles.height + st.vertical
         : direction === "Both"
-            ? tileset_selected_tiles.width + tile_dimensions.tileset.columns * tileset_selected_tiles.height
-            : tileset_selected_tiles.width;
+            ? tileset_selected_tiles.width + tile_dimensions.tileset.columns * tileset_selected_tiles.height + st.horizontal + st.vertical
+            : tileset_selected_tiles.width + st.horizontal;
+
+    const max_tiles = tile_dimensions.tileset.columns * tile_dimensions.tileset.rows;
+    const last_tile_id = tile.id + (frame_count - 1) * stride_value;
+    if (frame_count > 0 && last_tile_id >= max_tiles) return null;
 
     const frames: frame[] = [];
     for (let i = 0; i < frame_count; i++) {
-        frames.push({ tileId: tile.id + i * stride, duration });
+        frames.push({ tileId: tile.id + i * stride_value, duration });
     }
     return frames;
 }
@@ -209,18 +208,48 @@ function dialog_create(title: string, min_width?: number, min_height?: number) :
 }
 
 function animation_dialog_create(dialog: Dialog) : IAnimationConfirmation {
+    dialog!.addHeading("  The direction that animation frames advance in the sprite sheet", true);
+    dialog!.addNewRow();
     const animation_direction = dialog!.addComboBox('Direction: ', ['Right', 'Down', 'Both']);
 
+    dialog!.addSeparator();
+
+    dialog!.addHeading("  The number of animation frames to generate", true);
+    dialog!.addNewRow();
     const animation_frames_input = dialog!.addNumberInput('Frames: ');
     animation_frames_input.decimals = 0;
     animation_frames_input.minimum = 2;
     animation_frames_input.value = 2;
 
+    dialog!.addSeparator();
+
+    dialog!.addHeading("  Duration of each animation frame in milliseconds", true);
+    dialog!.addNewRow();
     const animation_frame_duration = dialog!.addNumberInput('Duration(ms): ');
     animation_frame_duration.decimals = 0;
     animation_frame_duration.minimum = 0;
     animation_frame_duration.maximum = 9900;
     animation_frame_duration.value = 100;
+
+    dialog!.addSeparator();
+
+    dialog!.addHeading("  Additional stride (in tiles) to advance between frames", true);
+    dialog!.addNewRow();
+    const animation_stride_horizontal = dialog!.addNumberInput('Horizontal Stride: ');
+    animation_stride_horizontal.decimals = 0;
+    animation_stride_horizontal.minimum = 0;
+    animation_stride_horizontal.value = 0;
+
+    const animation_stride_vertical = dialog!.addNumberInput('Vertical Stride: ');
+    animation_stride_vertical.decimals = 0;
+    animation_stride_vertical.minimum = 0;
+    animation_stride_vertical.value = 0;
+    animation_stride_vertical.enabled = false;
+
+    animation_direction.currentIndexChanged.connect((index: number) => {
+        animation_stride_horizontal.enabled = index !== 1;
+        animation_stride_vertical.enabled = index !== 0;
+    });
 
     const confirmation_button = dialog!.addButton("Confirm");
     const cancelation_button = dialog!.addButton("Cancel");
@@ -232,7 +261,9 @@ function animation_dialog_create(dialog: Dialog) : IAnimationConfirmation {
         confirmation_button,
         animation_frames_input: animation_frames_input,
         animation_frame_duration: animation_frame_duration,
-        animation_direction: animation_direction
+        animation_direction: animation_direction,
+        animation_stride_horizontal,
+        animation_stride_vertical
     }
 
     return data;

@@ -19,7 +19,7 @@
     reject() {}
     show() {}
     addComboBox(_label: string, _items: string[]) {
-        return { currentIndex: 0, currentTextChanged: { connect: () => {} } };
+        return { currentIndex: 0, currentIndexChanged: { connect: () => {} } };
     }
     addNumberInput(_label: string) {
         return {
@@ -56,6 +56,10 @@ export function makeTilesetAsset(cols: number, rows: number, tw = 16, th = 16, s
         tileSpacing: sp,
         margin: m,
     };
+}
+
+export function makeStride(horizontal = 0, vertical = 0) {
+    return { horizontal, vertical };
 }
 
 let _mod: any = null;

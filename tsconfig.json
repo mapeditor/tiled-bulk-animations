@@ -2,7 +2,7 @@
   "compilerOptions": {
     // Environment setup & latest features
     "lib": ["ESNext"],
-    "target": "esnext",
+    "target": "es2021",
     "module": "Preserve",
     "moduleDetection": "force",
     "jsx": "react-jsx",
