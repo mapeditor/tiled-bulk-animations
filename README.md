@@ -15,7 +15,7 @@ Supports three animation directions:
 
 ## Installation
 
-1. Download [`bulk-animations.zip`](https://github.com/Lillious-Networks/tiled-bulk-animations/releases/latest) from the latest release.
+1. Download [`bulk-animations.zip`](https://github.com/mapeditor/tiled-bulk-animations/releases/latest) from the latest release.
 2. Extract and place the `bulk-animations` folder into Tiled's extensions directory.
 
 | Platform | Extensions Directory |
@@ -64,3 +64,6 @@ bun test
 ### Debug Logging
 
 Set `config.debug` to `true` in `src/index.ts` to enable debug output. Messages appear in Tiled's console (**View → Views and Toolbars → Console**). Set it back to `false` before building a release.
+
+### Credits
+- Leonard Pabin aka (Len) and Zachariah Husiar aka (Zabin) for the artwork located in src/tests/data/
