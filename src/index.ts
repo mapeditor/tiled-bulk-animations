@@ -6,6 +6,16 @@ const config: IConfig = {
     debug: false
 };
 
+// Values last confirmed by the user, restored as defaults while the
+// extension remains loaded
+const last_used = {
+    direction: 0,
+    frames: 2,
+    duration: 100,
+    stride_horizontal: 0,
+    stride_vertical: 0
+};
+
 const action_animation_create = tiled.registerAction(`${config.name}_CreateFromSelection`, animation_create);
 action_animation_create.text = "Create Animations From Selection";
 action_animation_create.icon = "images/icon-create.png";
@@ -123,6 +133,12 @@ function animation_create() {
             }
         });
 
+        last_used.direction = result.animation_direction.currentIndex;
+        last_used.frames = frame_count;
+        last_used.duration = duration;
+        last_used.stride_horizontal = stride.horizontal;
+        last_used.stride_vertical = stride.vertical;
+
         dialog.accept();
     });
 }
@@ -228,7 +244,7 @@ function dialog_create(title: string, min_width?: number, min_height?: number): 
 }
 
 function animation_dialog_create(dialog: Dialog, tileset_selected_tiles: rect, tile_dimensions: ITilesetDimensions): IAnimationConfirmation {
-    dialog.addHeading("  The direction that animation frames advance in the sprite sheet", true);
+    dialog.addHeading("The direction that animation frames advance in the sprite sheet", true);
     dialog.addNewRow();
     const animation_direction = dialog.addComboBox('Direction: ', ['Right', 'Down', 'Both']);
 
@@ -245,37 +261,34 @@ function animation_dialog_create(dialog: Dialog, tileset_selected_tiles: rect, t
     const max_h_frames = 1 + Math.floor((columns - sel_x - sel_w) / sel_w);
     const max_v_frames = 1 + Math.floor((rows - sel_y - sel_h) / sel_h);
 
-    dialog.addHeading("  The number of animation frames to generate", true);
+    dialog.addHeading("The number of animation frames to generate", true);
     dialog.addNewRow();
     const animation_frames_input = dialog.addNumberInput('Frames: ');
     animation_frames_input.decimals = 0;
     animation_frames_input.minimum = 2;
     animation_frames_input.maximum = max_h_frames;
-    animation_frames_input.value = 2;
 
     dialog.addSeparator();
 
-    dialog.addHeading("  Duration of each animation frame in milliseconds", true);
+    dialog.addHeading("Duration of each animation frame in milliseconds", true);
     dialog.addNewRow();
-    const animation_frame_duration = dialog.addNumberInput('Duration(ms): ');
+    const animation_frame_duration = dialog.addNumberInput('Duration: ');
     animation_frame_duration.decimals = 0;
     animation_frame_duration.minimum = 0;
     animation_frame_duration.maximum = 9900;
-    animation_frame_duration.value = 100;
+    animation_frame_duration.suffix = " ms";
 
     dialog.addSeparator();
 
-    dialog.addHeading("  Additional stride (in tiles) to advance between frames", true);
+    dialog.addHeading("Additional stride (in tiles) to advance between frames", true);
     dialog.addNewRow();
-    const animation_stride_horizontal = dialog.addNumberInput('Horizontal Stride: ');
+    const animation_stride_horizontal = dialog.addNumberInput('Horizontal: ');
     animation_stride_horizontal.decimals = 0;
     animation_stride_horizontal.minimum = 1 - sel_w;
-    animation_stride_horizontal.value = 0;
 
-    const animation_stride_vertical = dialog.addNumberInput('Vertical Stride: ');
+    const animation_stride_vertical = dialog.addNumberInput('Vertical: ');
     animation_stride_vertical.decimals = 0;
     animation_stride_vertical.minimum = 1 - sel_h;
-    animation_stride_vertical.value = 0;
     animation_stride_vertical.enabled = false;
 
     animation_direction.currentIndexChanged.connect((index: number) => {
@@ -287,6 +300,14 @@ function animation_dialog_create(dialog: Dialog, tileset_selected_tiles: rect, t
             : index === 1 ? max_v_frames
             : max_h_frames * max_v_frames;
     });
+
+    // Restore the previously confirmed values, clamped to the limits of the
+    // current selection
+    animation_direction.currentIndex = last_used.direction;
+    animation_frames_input.value = last_used.frames;
+    animation_frame_duration.value = last_used.duration;
+    animation_stride_horizontal.value = last_used.stride_horizontal;
+    animation_stride_vertical.value = last_used.stride_vertical;
 
     const confirmation_button = dialog.addButton("Confirm");
     const cancelation_button = dialog.addButton("Cancel");
