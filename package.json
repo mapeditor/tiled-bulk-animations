@@ -13,7 +13,6 @@
   },
   "scripts": {
     "prepare": "husky",
-    "build": "bun ./src/utility/build.ts && bun minify",
-    "minify": "bun build --minify ./dist/bulk-animations/index.mjs --outfile=./dist/bulk-animations/index.mjs"
+    "build": "bun ./src/utility/build.ts"
   }
 }
