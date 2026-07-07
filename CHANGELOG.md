@@ -4,6 +4,7 @@
 
 ### Added
 - `@mapeditor/tiled-api` v1.11.0 type definitions
+- The dialog now remembers the last confirmed settings (direction, frames, duration and stride) until Tiled is closed or the extension is reloaded
 
 ### Changed
 - Rewritten from prototype-based JavaScript to TypeScript with strict mode
