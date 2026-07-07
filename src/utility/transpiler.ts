@@ -1,15 +1,13 @@
-const process_root_directory = process.cwd();
+import ts from "typescript";
 
-const transpiler = new Bun.Transpiler({
-    loader: "tsx"
-});
+const process_root_directory = process.cwd();
 
 export default async function transpile(local_path: string, destination: string): Promise<IResult> {
     const input_location = `${process_root_directory}/${local_path}`;
     const output_location = `${process_root_directory}/${destination}`;
     const file = Bun.file(input_location);
 
-    if (!file.exists()) {
+    if (!await file.exists()) {
         return {
             success: false,
             message: {
@@ -19,9 +17,21 @@ export default async function transpile(local_path: string, destination: string)
     }
 
     const file_content = await file.text();
-    const transpiled = await transpiler.transform(file_content);
 
-    await Bun.write(output_location, transpiled).catch((error) => {
+    // Emit with the TypeScript compiler, which downlevels class fields and
+    // other post-ES2021 syntax not supported by Qt's QJSEngine. Type checking
+    // is done separately by `tsc --noEmit`.
+    const transpiled = ts.transpileModule(file_content, {
+        fileName: input_location,
+        compilerOptions: {
+            target: ts.ScriptTarget.ES2021,
+            module: ts.ModuleKind.ESNext
+        }
+    }).outputText;
+
+    try {
+        await Bun.write(output_location, transpiled);
+    } catch (error: any) {
         return {
             success: false,
             message: {
@@ -29,7 +39,7 @@ export default async function transpile(local_path: string, destination: string)
                 stack: error.stack
             }
         };
-    });
+    }
 
     return {
         success: true,
