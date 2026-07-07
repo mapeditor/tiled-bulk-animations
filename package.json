@@ -1,0 +1,18 @@
+{
+  "name": "tiled-bulk-animations",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "husky": "^9.1.7",
+    "@mapeditor/tiled-api": "^1.11.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "build": "bun ./src/utility/build.ts"
+  }
+}

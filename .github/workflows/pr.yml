@@ -1,0 +1,26 @@
+name: Test
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.0
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install Dependencies
+        run: |
+          bun install
+
+      - name: Type Check
+        run: |
+          bun run tsc --noEmit
+
+      - name: Run Tests
+        run: |
+          bun test
