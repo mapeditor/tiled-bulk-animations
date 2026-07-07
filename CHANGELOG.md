@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.4.0] - 2026-07-01
+## [1.4.0] - 2026-07-07
 
 ### Added
 - `@mapeditor/tiled-api` v1.11.0 type definitions
@@ -8,6 +8,8 @@
 
 ### Changed
 - Rewritten from prototype-based JavaScript to TypeScript with strict mode
+- The stride inputs now specify an additional offset on top of the selection size instead of the absolute stride; negative values allow strides tighter than the selection
+- Frame counts are validated against the tileset bounds: the frames input is capped per direction, and configurations that do not fit show an alert without applying anything
 - Icons moved to `images/` directory with updated paths
 - Buttons renamed: `OK` → `Confirm`
 - Menu items renamed: `Create Bulk Animations` → `Create Animations From Selection`, `Clear Animations` → `Clear Animations From Selection`

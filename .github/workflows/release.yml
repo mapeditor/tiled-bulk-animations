@@ -7,7 +7,7 @@ on:
         paths:
             - 'src/**'
             - 'package.json'
-            - 'bun.lockb'
+            - 'bun.lock'
             - '.github/workflows/release.yml'
 
 permissions:
@@ -22,27 +22,60 @@ jobs:
         - name: Checkout
           uses: actions/checkout@v7.0.0
 
+        # The release is tagged with the version declared in package.json
+        - name: Determine Version
+          id: version
+          run: echo "version=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
+
+        # Skip the release when this version was already released, so pushes
+        # without a version bump don't create spurious releases
+        - name: Check for Existing Tag
+          id: tag
+          run: |
+            if git ls-remote --exit-code --tags origin "refs/tags/v${{ steps.version.outputs.version }}" > /dev/null; then
+                echo "exists=true" >> "$GITHUB_OUTPUT"
+            else
+                echo "exists=false" >> "$GITHUB_OUTPUT"
+            fi
+
         # Install Bun
         - uses: oven-sh/setup-bun@v2
+          if: steps.tag.outputs.exists == 'false'
 
-        # Build
+        - name: Install Dependencies
+          if: steps.tag.outputs.exists == 'false'
+          run: |
+            bun install
+
         - name: Build
+          if: steps.tag.outputs.exists == 'false'
           run: |
             bun run build
 
         # Zip the dist folder
         - name: Zip Build Output
+          if: steps.tag.outputs.exists == 'false'
           run: |
             cd dist
             zip -qq -r ../bulk-animations.zip bulk-animations/
 
-          # Generate file checksum
+        # Generate file checksum
         - name: Generate Checksum
+          if: steps.tag.outputs.exists == 'false'
           run: |
             sha256sum bulk-animations.zip > checksum.txt
 
+        # The release notes are the CHANGELOG.md section of this version
+        - name: Extract Release Notes
+          if: steps.tag.outputs.exists == 'false'
+          run: |
+            awk -v ver="${{ steps.version.outputs.version }}" \
+                '$0 ~ "^## \\[" ver "\\]" { found = 1; next } /^## / { found = 0 } found' \
+                CHANGELOG.md > release-notes.md
+
         # Create release
         - name: GH Release
+          if: steps.tag.outputs.exists == 'false'
           uses: softprops/action-gh-release@v3.0.1
           env:
             GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -50,6 +83,7 @@ jobs:
             files: |
                 bulk-animations.zip
                 checksum.txt
-            tag_name: "1.4.${{github.run_number}}"
+            tag_name: "v${{ steps.version.outputs.version }}"
             make_latest: "true"
-            name: "Release v1.4.${{github.run_number}}"
+            name: "Release v${{ steps.version.outputs.version }}"
+            body_path: release-notes.md

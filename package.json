@@ -1,5 +1,6 @@
 {
   "name": "tiled-bulk-animations",
+  "version": "1.4.0",
   "module": "src/index.ts",
   "type": "module",
   "private": true,
