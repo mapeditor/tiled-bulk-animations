@@ -114,12 +114,13 @@ function animation_create () {
             tiled.alert("No direction selected. (This should not occur)");
             return;
         }
+        const results = selected_tiles.map(tile => get_tile_frames(tile, frame_count, duration, direction, tileset_selected_tiles, tileset_dimensions, stride));
+        if (results.some(r => r === null)) {
+            tiled.alert("The animation does not fit within the tileset bounds for one or more selected tiles. Try reducing the frame count or stride.");
+            return;
+        }
+
         tileset.macro("Create Animations (Bulk)", () => {
-            const results = selected_tiles.map(tile => get_tile_frames(tile, frame_count, duration, direction, tileset_selected_tiles, tileset_dimensions, stride));
-            if (results.some(r => r === null)) {
-                tiled.alert("The animation does not fit within the tileset bounds for one or more selected tiles. Try reducing the frame count or stride.");
-                return;
-            }
             for (let i = 0; i < selected_tiles.length; i++) {
                 selected_tiles[i]!.frames = results[i]!;
             }
