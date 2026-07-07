@@ -16,7 +16,7 @@ const action_animation_clear = tiled.registerAction(`${config.name}_ClearFromSel
     action_animation_clear.text = "Clear Animations From Selection";
     action_animation_clear.icon = "images/icon-clear.png";
 
-export function tileset_selection (tileset: Tileset, selected_tiles: Tile[]) {
+export function tileset_selection (tileset: Tileset, selected_tiles: Tile[]) : [rect, ITilesetDimensions] {
     // Create structured object for organization and better
     // visibility into what's needed in the object
     const tileset_dimensions : ITilesetDimensions = {
@@ -77,13 +77,12 @@ function animation_create () {
     }
 
     // Ensure that there are tiles selected to operate on
-    const selected_tile_count = tileset.selectedTiles.length > 0 ? tileset.selectedTiles: 0;
-    if (!selected_tile_count) {
+    if (!tileset.selectedTiles.length) {
         tiled.alert("No tiles selected");
         return;
     }
 
-    debug(`Selected tiles: ${selected_tile_count.length}`);
+    debug(`Selected tiles: ${tileset.selectedTiles.length}`);
 
     // Sort existing tiles
     const selected_tiles = tileset.selectedTiles.slice().sort((a, b) => a.id - b.id);
@@ -91,21 +90,18 @@ function animation_create () {
     // Check if the selected tiles have existing animations
     const selected_animated_tiles = selected_tiles.filter(tile => tile.frames?.length > 0);
 
-    // Check if there are animated tiles to operate on
-    const selected_animated_tile_count = selected_animated_tiles.length > 0 ? selected_animated_tiles: 0;
-
     // If there are existing animations, ask the user for permission to overwrite them
-    if (selected_animated_tile_count) {
-        const response = tiled.confirm(`There were ${selected_animated_tile_count.length} tile(s) found in your selection that have existing animations. These will be overwritten. Continue?`);
-        if (!response) { return; } else { debug(`Overwriting ${selected_animated_tile_count.length} tile(s)`) }
+    if (selected_animated_tiles.length) {
+        const response = tiled.confirm(`There were ${selected_animated_tiles.length} tile(s) found in your selection that have existing animations. These will be overwritten. Continue?`);
+        if (!response) { return; } else { debug(`Overwriting ${selected_animated_tiles.length} tile(s)`) }
     }
 
     const _tileset_selection = tileset_selection(tileset, selected_tiles)
-    const tileset_selected_tiles = _tileset_selection[0] as rect;
-    const tileset_dimensions = _tileset_selection[1] as ITilesetDimensions;
+    const tileset_selected_tiles = _tileset_selection[0];
+    const tileset_dimensions = _tileset_selection[1];
 
     const dialog = dialog_create(config.title, 400);
-    const result = animation_dialog_create(dialog);
+    const result = animation_dialog_create(dialog, tileset_selected_tiles, tileset_dimensions);
     result.confirmation_button.clicked.connect(() => {
         const duration = result.animation_frame_duration.value;
         const frame_count = result.animation_frames_input.value;
@@ -119,10 +115,13 @@ function animation_create () {
             return;
         }
         tileset.macro("Create Animations (Bulk)", () => {
-            for (const tile of selected_tiles) {
-                const tile_frames = get_tile_frames(tile, frame_count, duration, direction, tileset_selected_tiles, tileset_dimensions, stride);
-                if (!tile_frames) return;
-                    tile.frames = tile_frames;
+            const results = selected_tiles.map(tile => get_tile_frames(tile, frame_count, duration, direction, tileset_selected_tiles, tileset_dimensions, stride));
+            if (results.some(r => r === null)) {
+                tiled.alert("The animation does not fit within the tileset bounds for one or more selected tiles. Try reducing the frame count or stride.");
+                return;
+            }
+            for (let i = 0; i < selected_tiles.length; i++) {
+                selected_tiles[i]!.frames = results[i]!;
             }
         });
 
@@ -164,11 +163,16 @@ export function get_tile_frames(tile: Tile, frame_count: number, duration: numbe
     }
 
     const stride_value = direction === "Down"
-        ? columns * tileset_selected_tiles.height + st.vertical
+        ? columns * (tileset_selected_tiles.height + st.vertical)
         : tileset_selected_tiles.width + st.horizontal;
 
-    const last_tile_id = tile.id + (frame_count - 1) * stride_value;
-    if (frame_count > 0 && last_tile_id >= max_tiles) return null;
+    if (frame_count > 0) {
+        if (direction === "Right") {
+            if (tile.id % columns + (frame_count - 1) * stride_value >= columns) return null;
+        } else {
+            if (tile.id + (frame_count - 1) * stride_value >= max_tiles) return null;
+        }
+    }
 
     const frames: frame[] = [];
     for (let i = 0; i < frame_count; i++) {
@@ -185,8 +189,7 @@ function animation_clear () {
     }
 
     // Ensure that there are tiles selected to operate on
-    const selected_tile_count = tileset.selectedTiles.length > 0 ? tileset.selectedTiles: 0;
-    if (!selected_tile_count) {
+    if (!tileset.selectedTiles.length) {
         tiled.alert("No tiles selected");
         return;
     }
@@ -197,13 +200,10 @@ function animation_clear () {
     // Check if the selected tiles have existing animations
     const selected_animated_tiles = selected_tiles.filter(tile => tile.frames?.length > 0);
 
-    // Check if there are animated tiles to operate on
-    const selected_animated_tile_count = selected_animated_tiles.length > 0 ? selected_animated_tiles: 0;
-
     // If there are existing animations, ask the user for permission to clear them
-    if (selected_animated_tile_count) {
-        const response = tiled.confirm(`There were ${selected_animated_tile_count.length} tile(s) found in your selection that have existing animations. The animations will be removed. Continue?`);
-        if (!response) { return; } else { debug(`Clearing ${selected_animated_tile_count.length} tile(s) animations`) }
+    if (selected_animated_tiles.length) {
+        const response = tiled.confirm(`There were ${selected_animated_tiles.length} tile(s) found in your selection that have existing animations. The animations will be removed. Continue?`);
+        if (!response) { return; } else { debug(`Clearing ${selected_animated_tiles.length} tile(s) animations`) }
     }
 
     // Clear animation frames
@@ -229,18 +229,26 @@ function dialog_create(title: string, min_width?: number, min_height?: number) :
     return dialog;
 }
 
-function animation_dialog_create(dialog: Dialog) : IAnimationConfirmation {
+function animation_dialog_create(dialog: Dialog, tileset_selected_tiles: rect, tile_dimensions: ITilesetDimensions) : IAnimationConfirmation {
     dialog!.addHeading("  The direction that animation frames advance in the sprite sheet", true);
     dialog!.addNewRow();
     const animation_direction = dialog!.addComboBox('Direction: ', ['Right', 'Down', 'Both']);
 
     dialog!.addSeparator();
 
+    const columns = tile_dimensions.tileset.columns;
+    const rows = tile_dimensions.tileset.rows;
+    const sel_x = tileset_selected_tiles.x;
+    const sel_y = tileset_selected_tiles.y;
+    const sel_w = tileset_selected_tiles.width;
+    const sel_h = tileset_selected_tiles.height;
+
     dialog!.addHeading("  The number of animation frames to generate", true);
     dialog!.addNewRow();
     const animation_frames_input = dialog!.addNumberInput('Frames: ');
     animation_frames_input.decimals = 0;
     animation_frames_input.minimum = 2;
+    animation_frames_input.maximum = sel_w > 0 ? 1 + Math.floor((columns - sel_x - sel_w) / sel_w) : 99999;
     animation_frames_input.value = 2;
 
     dialog!.addSeparator();
@@ -259,18 +267,29 @@ function animation_dialog_create(dialog: Dialog) : IAnimationConfirmation {
     dialog!.addNewRow();
     const animation_stride_horizontal = dialog!.addNumberInput('Horizontal Stride: ');
     animation_stride_horizontal.decimals = 0;
-    animation_stride_horizontal.minimum = 0;
+    animation_stride_horizontal.minimum = 1 - sel_w;
     animation_stride_horizontal.value = 0;
 
     const animation_stride_vertical = dialog!.addNumberInput('Vertical Stride: ');
     animation_stride_vertical.decimals = 0;
-    animation_stride_vertical.minimum = 0;
+    animation_stride_vertical.minimum = 1 - sel_h;
     animation_stride_vertical.value = 0;
     animation_stride_vertical.enabled = false;
 
     animation_direction.currentIndexChanged.connect((index: number) => {
         animation_stride_horizontal.enabled = index !== 1;
         animation_stride_vertical.enabled = index !== 0;
+        animation_stride_horizontal.minimum = index === 1 ? 0 : 1 - sel_w;
+        animation_stride_vertical.minimum = index === 0 ? 0 : 1 - sel_h;
+        if (index === 0) {
+            animation_frames_input.maximum = sel_w > 0 ? 1 + Math.floor((columns - sel_x - sel_w) / sel_w) : 99999;
+        } else if (index === 1) {
+            animation_frames_input.maximum = sel_h > 0 ? 1 + Math.floor((rows - sel_y - sel_h) / sel_h) : 99999;
+        } else {
+            const hf = sel_w > 0 ? 1 + Math.floor((columns - sel_x - sel_w) / sel_w) : 99999;
+            const vf = sel_h > 0 ? 1 + Math.floor((rows - sel_y - sel_h) / sel_h) : 99999;
+            animation_frames_input.maximum = hf * vf;
+        }
     });
 
     const confirmation_button = dialog!.addButton("Confirm");
