@@ -1,5 +1,5 @@
 import { test, expect, describe } from "bun:test";
-import { makeTile, makeRect, makeTilesetDimensions, makeStride, makeTilesetAsset, getIndexModule } from "./_helpers";
+import { makeTile, makeRect, makeTilesetDimensions, makeStride, makeTilesetAsset, getIndexModule, AnimationDirection } from "./_helpers";
 
 // These constants are derived from test_map.json tileset configurations
 const TILESETS = {
@@ -98,7 +98,7 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
         const cfg = TILESETS.group1.rect2;
         const tile = makeTile(0);
         const frames = get_tile_frames(
-            tile, 4, 500, "Right",
+            tile, 4, 500, AnimationDirection.Right,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
@@ -114,7 +114,7 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
         const cfg = TILESETS.group1.rect1;
         const tile = makeTile(0);
         const frames = get_tile_frames(
-            tile, 4, 500, "Down",
+            tile, 4, 500, AnimationDirection.Down,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
@@ -130,7 +130,7 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
         const cfg = TILESETS.group1.rect1;
         const tile = makeTile(0);
         const frames = get_tile_frames(
-            tile, 4, 500, "Both",
+            tile, 4, 500, AnimationDirection.Both,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
@@ -146,7 +146,7 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
         const cfg = TILESETS.group1.rect2;
         const tile = makeTile(0);
         const frames = get_tile_frames(
-            tile, 4, 500, "Both",
+            tile, 4, 500, AnimationDirection.Both,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
@@ -162,7 +162,7 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
         const cfg = TILESETS.group1.square;
         const tile = makeTile(0);
         const frames = get_tile_frames(
-            tile, 4, 500, "Both",
+            tile, 4, 500, AnimationDirection.Both,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
@@ -178,7 +178,7 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
         const cfg = TILESETS.group3.rect2;
         const tile = makeTile(0);
         const frames = get_tile_frames(
-            tile, 4, 500, "Right",
+            tile, 4, 500, AnimationDirection.Right,
             makeRect(0, 0, 2, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
@@ -193,7 +193,7 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
         const cfg = TILESETS.group3.rect2;
         const tile = makeTile(0);
         const frames = get_tile_frames(
-            tile, 4, 500, "Both",
+            tile, 4, 500, AnimationDirection.Both,
             makeRect(0, 0, 2, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
@@ -211,7 +211,7 @@ describe("integration: stride with real tileset layouts", () => {
         const cfg = TILESETS.group1.rect2;
         const tile = makeTile(0);
         const frames = get_tile_frames(
-            tile, 3, 500, "Right",
+            tile, 3, 500, AnimationDirection.Right,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th),
             makeStride(1)
@@ -226,7 +226,7 @@ describe("integration: stride with real tileset layouts", () => {
         const cfg = TILESETS.group1.rect1;
         const tile = makeTile(0);
         const frames = get_tile_frames(
-            tile, 3, 500, "Down",
+            tile, 3, 500, AnimationDirection.Down,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th),
             makeStride(0, 1)
@@ -241,7 +241,7 @@ describe("integration: stride with real tileset layouts", () => {
         const cfg = TILESETS.group1.square;
         const tile = makeTile(0);
         const frames = get_tile_frames(
-            tile, 3, 500, "Both",
+            tile, 3, 500, AnimationDirection.Both,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th),
             makeStride(3, 0)
@@ -257,7 +257,7 @@ describe("integration: stride with real tileset layouts", () => {
         const cfg = TILESETS.group1.rect2;
         const tile = makeTile(0);
         const frames = get_tile_frames(
-            tile, 4, 500, "Right",
+            tile, 4, 500, AnimationDirection.Right,
             makeRect(0, 0, 2, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th),
             makeStride(1)
@@ -274,7 +274,7 @@ describe("integration: frame_count edge cases with real tilesets", () => {
         const { get_tile_frames } = await getIndexModule();
         const tile = makeTile(0);
         const frames = get_tile_frames(
-            tile, 0, 100, "Right",
+            tile, 0, 100, AnimationDirection.Right,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(6, 15, 32, 32)
         );
@@ -285,7 +285,7 @@ describe("integration: frame_count edge cases with real tilesets", () => {
         const { get_tile_frames } = await getIndexModule();
         const tile = makeTile(42);
         const frames = get_tile_frames(
-            tile, 1, 100, "Down",
+            tile, 1, 100, AnimationDirection.Down,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(12, 9, 32, 32)
         );
@@ -297,7 +297,7 @@ describe("integration: frame_count edge cases with real tilesets", () => {
         const { get_tile_frames } = await getIndexModule();
         const tile = makeTile(0);
         const frames = get_tile_frames(
-            tile, 20, 500, "Right",
+            tile, 20, 500, AnimationDirection.Right,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(100, 10, 32, 32)
         );
@@ -318,7 +318,7 @@ describe("integration: consistency across tileset variants", () => {
         for (const cols of tilesetColumnWidths) {
             const rows = 10;
             const frames = get_tile_frames(
-                tile, 2, 100, "Right",
+                tile, 2, 100, AnimationDirection.Right,
                 sel,
                 makeTilesetDimensions(cols, rows, 32, 32)
             );
@@ -333,8 +333,8 @@ describe("integration: consistency across tileset variants", () => {
         const tile = makeTile(0);
         const sel = makeRect(0, 0, 3, 2);
 
-        const frames6 = get_tile_frames(tile, 3, 100, "Down", sel, makeTilesetDimensions(6, 15, 32, 32));
-        const frames12 = get_tile_frames(tile, 3, 100, "Down", sel, makeTilesetDimensions(12, 9, 32, 32));
+        const frames6 = get_tile_frames(tile, 3, 100, AnimationDirection.Down, sel, makeTilesetDimensions(6, 15, 32, 32));
+        const frames12 = get_tile_frames(tile, 3, 100, AnimationDirection.Down, sel, makeTilesetDimensions(12, 9, 32, 32));
 
         // 6 cols: stride = 6*2 = 12  → 0, 12, 24
         // 12 cols: stride = 12*2 = 24 → 0, 24, 48
@@ -349,8 +349,8 @@ describe("integration: consistency across tileset variants", () => {
         const sel = makeRect(0, 0, 2, 2);
         const st = makeStride(1);
 
-        const frames16 = get_tile_frames(tile, 3, 100, "Right", sel, makeTilesetDimensions(8, 10, 16, 16), st);
-        const frames32 = get_tile_frames(tile, 3, 100, "Right", sel, makeTilesetDimensions(8, 10, 32, 32), st);
+        const frames16 = get_tile_frames(tile, 3, 100, AnimationDirection.Right, sel, makeTilesetDimensions(8, 10, 16, 16), st);
+        const frames32 = get_tile_frames(tile, 3, 100, AnimationDirection.Right, sel, makeTilesetDimensions(8, 10, 32, 32), st);
 
         // stride = 2 + 1 = 3, independent of tile width/height
         expect(frames16[1].tileId).toBe(3);

@@ -2,7 +2,6 @@
 const config: IConfig = {
     name: "BulkAnimationEditor",
     title: "Bulk Animation Editor",
-    version: "1.4.0",
     debug: false
 };
 
@@ -15,6 +14,18 @@ const last_used = {
     stride_horizontal: 0,
     stride_vertical: 0
 };
+
+enum AnimationDirection {
+    Right,
+    Down,
+    Both
+}
+
+const directions = [
+    AnimationDirection.Right,
+    AnimationDirection.Down,
+    AnimationDirection.Both,
+];
 
 const action_animation_create = tiled.registerAction(`${config.name}_CreateFromSelection`, animation_create);
 action_animation_create.text = "Create Animations From Selection";
@@ -112,12 +123,12 @@ function animation_create() {
     result.confirmation_button.clicked.connect(() => {
         const duration = result.animation_frame_duration.value;
         const frame_count = result.animation_frames_input.value;
-        const direction = ["Right", "Down", "Both"][result.animation_direction.currentIndex];
+        const direction = result.animation_direction.currentIndex as AnimationDirection;
         const stride: IStride = {
             horizontal: result.animation_stride_horizontal.value,
             vertical: result.animation_stride_vertical.value
         };
-        if (!direction) {
+        if (direction === undefined) {
             tiled.alert("No direction selected. (This should not occur)");
             return;
         }
@@ -143,11 +154,11 @@ function animation_create() {
     });
 }
 
-export function get_tile_frames(tile: Tile, frame_count: number, duration: number, direction: string, tileset_selected_tiles: rect, tile_dimensions: ITilesetDimensions, stride: IStride = { horizontal: 0, vertical: 0 }) {
+export function get_tile_frames(tile: Tile, frame_count: number, duration: number, direction: AnimationDirection, tileset_selected_tiles: rect, tile_dimensions: ITilesetDimensions, stride: IStride = { horizontal: 0, vertical: 0 }) {
     const columns = tile_dimensions.tileset.columns;
     const max_tiles = columns * tile_dimensions.tileset.rows;
 
-    if (direction === "Both") {
+    if (direction === AnimationDirection.Both) {
         const h_advance = tileset_selected_tiles.width + stride.horizontal;
         const v_advance = tileset_selected_tiles.height + stride.vertical;
         const cells_per_row = 1 + Math.floor((columns - tileset_selected_tiles.x - tileset_selected_tiles.width) / h_advance);
@@ -175,12 +186,12 @@ export function get_tile_frames(tile: Tile, frame_count: number, duration: numbe
         return frames;
     }
 
-    const stride_value = direction === "Down"
+    const stride_value = direction === AnimationDirection.Down
         ? columns * (tileset_selected_tiles.height + stride.vertical)
         : tileset_selected_tiles.width + stride.horizontal;
 
     if (frame_count > 0) {
-        if (direction === "Right") {
+        if (direction === AnimationDirection.Right) {
             if (tile.id % columns + (frame_count - 1) * stride_value >= columns) return null;
         } else {
             if (tile.id + (frame_count - 1) * stride_value >= max_tiles) return null;
@@ -246,7 +257,7 @@ function dialog_create(title: string, min_width?: number, min_height?: number): 
 function animation_dialog_create(dialog: Dialog, tileset_selected_tiles: rect, tile_dimensions: ITilesetDimensions): IAnimationConfirmation {
     dialog.addHeading("The direction that animation frames advance in the sprite sheet", true);
     dialog.addNewRow();
-    const animation_direction = dialog.addComboBox('Direction: ', ['Right', 'Down', 'Both']);
+    const animation_direction = dialog.addComboBox('Direction: ', directions.map(d => AnimationDirection[d]));
 
     dialog.addSeparator();
 
