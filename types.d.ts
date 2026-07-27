@@ -15,7 +15,6 @@ declare interface IResult {
 declare interface IConfig {
     name: string
     title: string
-    version: string
     debug?: boolean
 }
 

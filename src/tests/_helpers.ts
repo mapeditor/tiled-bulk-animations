@@ -1,3 +1,9 @@
+export enum AnimationDirection {
+    Right,
+    Down,
+    Both
+}
+
 (globalThis as any).tiled = {
     activeAssetChanged: { connect: () => {} },
     registerAction: () => ({} as any),
