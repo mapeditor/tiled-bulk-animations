@@ -5,8 +5,5 @@ test("Right stride equals exactly the selection width", async () => {
     const { get_tile_frames, AnimationDirection } = await getIndexModule();
     const tile = makeTile(0);
     const frames = get_tile_frames(tile, 4, 100, AnimationDirection.Right, makeRect(0, 0, 1, 1), makeTilesetDimensions(10, 8))!;
-    expect(frames[0]!.tileId).toBe(0);
-    expect(frames[1]!.tileId).toBe(1);
-    expect(frames[2]!.tileId).toBe(2);
-    expect(frames[3]!.tileId).toBe(3);
+    expect(frames.map(f => f.tileId)).toEqual([0, 1, 2, 3]);
 });

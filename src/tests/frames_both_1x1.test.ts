@@ -5,9 +5,7 @@ test("Both with 1x1 selection advances along the row", async () => {
     const { get_tile_frames, AnimationDirection } = await getIndexModule();
     const tile = makeTile(0);
     const frames = get_tile_frames(tile, 3, 100, AnimationDirection.Both, makeRect(0, 0, 1, 1), makeTilesetDimensions(10, 8))!;
-    expect(frames[0]!.tileId).toBe(0);
-    expect(frames[1]!.tileId).toBe(1);
-    expect(frames[2]!.tileId).toBe(2);
+    expect(frames.map(f => f.tileId)).toEqual([0, 1, 2]);
 });
 
 // Covers the wrap itself, which the case above never reaches: a 1x1 selection

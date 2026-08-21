@@ -101,12 +101,13 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             tile, 4, 500, AnimationDirection.Right,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
-        )!;
-        expect(frames).toHaveLength(4);
-        expect(frames[0]).toEqual({ tileId: 0, duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 3, duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 6, duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 9, duration: 500 });
+        );
+        expect(frames).toEqual([
+            { tileId: 0, duration: 500 },
+            { tileId: 3, duration: 500 },
+            { tileId: 6, duration: 500 },
+            { tileId: 9, duration: 500 },
+        ]);
     });
 
     test("rect1 (6 col, 3x2 sel): Down direction stride = columns * height", async () => {
@@ -117,12 +118,14 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             tile, 4, 500, AnimationDirection.Down,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
-        )!;
+        );
         // columns=6, height=2 → stride = 12
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 12, duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 24, duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 36, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 12, duration: 500 },
+            { tileId: 24, duration: 500 },
+            { tileId: 36, duration: 500 },
+        ]);
     });
 
     test("rect1 (6 col, 3x2 sel): Both fills row then wraps down", async () => {
@@ -133,12 +136,14 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             tile, 4, 500, AnimationDirection.Both,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
-        )!;
+        );
         // cells_per_row = 2, wraps after frame 1
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 3,  duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 12, duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 15, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 3,  duration: 500 },
+            { tileId: 12, duration: 500 },
+            { tileId: 15, duration: 500 },
+        ]);
     });
 
     test("rect2 (12 col, 3x2 sel): Both fills entire row before wrapping", async () => {
@@ -149,12 +154,14 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             tile, 4, 500, AnimationDirection.Both,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
-        )!;
+        );
         // cells_per_row = 4, no wrap for 4 frames
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 3,  duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 6,  duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 9,  duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 3,  duration: 500 },
+            { tileId: 6,  duration: 500 },
+            { tileId: 9,  duration: 500 },
+        ]);
     });
 
     test("square (9 col, 3x2 sel): Both wraps to next row after 3 cells", async () => {
@@ -165,12 +172,14 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             tile, 4, 500, AnimationDirection.Both,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
-        )!;
+        );
         // cells_per_row = 3, wraps after frame 2
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 3,  duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 6,  duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 18, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 3,  duration: 500 },
+            { tileId: 6,  duration: 500 },
+            { tileId: 18, duration: 500 },
+        ]);
     });
 
     test("group3 rect2 (8 col, 2x2 sel): Right direction stride = 2", async () => {
@@ -181,11 +190,13 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             tile, 4, 500, AnimationDirection.Right,
             makeRect(0, 0, 2, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
-        )!;
-        expect(frames[0]).toEqual({ tileId: 0, duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 2, duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 4, duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 6, duration: 500 });
+        );
+        expect(frames).toEqual([
+            { tileId: 0, duration: 500 },
+            { tileId: 2, duration: 500 },
+            { tileId: 4, duration: 500 },
+            { tileId: 6, duration: 500 },
+        ]);
     });
 
     test("group3 rect2 (8 col, 2x2 sel): Both fills row then wraps", async () => {
@@ -196,12 +207,14 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             tile, 4, 500, AnimationDirection.Both,
             makeRect(0, 0, 2, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
-        )!;
+        );
         // cells_per_row = 4, no wrap for 4 frames
-        expect(frames[0]).toEqual({ tileId: 0, duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 2, duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 4, duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 6, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0, duration: 500 },
+            { tileId: 2, duration: 500 },
+            { tileId: 4, duration: 500 },
+            { tileId: 6, duration: 500 },
+        ]);
     });
 });
 
@@ -215,10 +228,12 @@ describe("integration: stride with real tileset layouts", () => {
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th),
             makeStride(1)
-        )!;
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 4,  duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 8,  duration: 500 });
+        );
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 4,  duration: 500 },
+            { tileId: 8,  duration: 500 },
+        ]);
     });
 
     test("rect1 (6 col, 3x2 sel, vertical=1): Down stride = 6 * (2 + 1) = 18", async () => {
@@ -230,10 +245,12 @@ describe("integration: stride with real tileset layouts", () => {
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th),
             makeStride(0, 1)
-        )!;
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 18, duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 36, duration: 500 });
+        );
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 18, duration: 500 },
+            { tileId: 36, duration: 500 },
+        ]);
     });
 
     test("square (9 col, 3x2 sel): Both with horizontal stride wraps to next row", async () => {
@@ -245,11 +262,13 @@ describe("integration: stride with real tileset layouts", () => {
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th),
             makeStride(3, 0)
-        )!;
+        );
         // h_advance = 6, cells_per_row = 2
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 6,  duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 18, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 6,  duration: 500 },
+            { tileId: 18, duration: 500 },
+        ]);
     });
 
     test("group1 rect2 (12 col, 2x2 sel): horizontal stride on tileset", async () => {
@@ -261,11 +280,13 @@ describe("integration: stride with real tileset layouts", () => {
             makeRect(0, 0, 2, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th),
             makeStride(1)
-        )!;
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 3,  duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 6,  duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 9, duration: 500 });
+        );
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 3,  duration: 500 },
+            { tileId: 6,  duration: 500 },
+            { tileId: 9, duration: 500 },
+        ]);
     });
 });
 
@@ -288,9 +309,10 @@ describe("integration: frame_count edge cases with real tilesets", () => {
             tile, 1, 100, AnimationDirection.Down,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(12, 9, 32, 32)
-        )!;
-        expect(frames).toHaveLength(1);
-        expect(frames[0]).toEqual({ tileId: 42, duration: 100 });
+        );
+        expect(frames).toEqual([
+            { tileId: 42, duration: 100 },
+        ]);
     });
 
     test("large frame_count works correctly", async () => {
@@ -322,8 +344,7 @@ describe("integration: consistency across tileset variants", () => {
                 sel,
                 makeTilesetDimensions(cols, rows, 32, 32)
             )!;
-            expect(frames[0]!.tileId).toBe(0);
-            expect(frames[1]!.tileId).toBe(3);
+            expect(frames.map(f => f.tileId)).toEqual([0, 3]);
         }
     });
 
