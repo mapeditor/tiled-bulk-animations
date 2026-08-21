@@ -1,5 +1,5 @@
 import { test, expect, describe } from "bun:test";
-import { makeTile, makeRect, makeTilesetDimensions, makeStride, makeTilesetAsset, getIndexModule, AnimationDirection } from "./_helpers";
+import { makeTile, makeRect, makeTilesetDimensions, makeStride, makeTilesetAsset, getIndexModule } from "./_helpers";
 
 // These constants are derived from test_map.json tileset configurations
 const TILESETS = {
@@ -94,7 +94,7 @@ describe("integration: tileset_selection", () => {
 
 describe("integration: get_tile_frames with real tileset layouts", () => {
     test("rect2 (12 col, 3x2 sel): Right direction stride = 3", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const cfg = TILESETS.group1.rect2;
         const tile = makeTile(0);
         const frames = get_tile_frames(
@@ -102,15 +102,16 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
-        expect(frames).toHaveLength(4);
-        expect(frames[0]).toEqual({ tileId: 0, duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 3, duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 6, duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 9, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0, duration: 500 },
+            { tileId: 3, duration: 500 },
+            { tileId: 6, duration: 500 },
+            { tileId: 9, duration: 500 },
+        ]);
     });
 
     test("rect1 (6 col, 3x2 sel): Down direction stride = columns * height", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const cfg = TILESETS.group1.rect1;
         const tile = makeTile(0);
         const frames = get_tile_frames(
@@ -119,14 +120,16 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
         // columns=6, height=2 → stride = 12
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 12, duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 24, duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 36, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 12, duration: 500 },
+            { tileId: 24, duration: 500 },
+            { tileId: 36, duration: 500 },
+        ]);
     });
 
     test("rect1 (6 col, 3x2 sel): Both fills row then wraps down", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const cfg = TILESETS.group1.rect1;
         const tile = makeTile(0);
         const frames = get_tile_frames(
@@ -135,14 +138,16 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
         // cells_per_row = 2, wraps after frame 1
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 3,  duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 12, duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 15, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 3,  duration: 500 },
+            { tileId: 12, duration: 500 },
+            { tileId: 15, duration: 500 },
+        ]);
     });
 
     test("rect2 (12 col, 3x2 sel): Both fills entire row before wrapping", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const cfg = TILESETS.group1.rect2;
         const tile = makeTile(0);
         const frames = get_tile_frames(
@@ -151,14 +156,16 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
         // cells_per_row = 4, no wrap for 4 frames
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 3,  duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 6,  duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 9,  duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 3,  duration: 500 },
+            { tileId: 6,  duration: 500 },
+            { tileId: 9,  duration: 500 },
+        ]);
     });
 
     test("square (9 col, 3x2 sel): Both wraps to next row after 3 cells", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const cfg = TILESETS.group1.square;
         const tile = makeTile(0);
         const frames = get_tile_frames(
@@ -167,14 +174,16 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
         // cells_per_row = 3, wraps after frame 2
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 3,  duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 6,  duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 18, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 3,  duration: 500 },
+            { tileId: 6,  duration: 500 },
+            { tileId: 18, duration: 500 },
+        ]);
     });
 
     test("group3 rect2 (8 col, 2x2 sel): Right direction stride = 2", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const cfg = TILESETS.group3.rect2;
         const tile = makeTile(0);
         const frames = get_tile_frames(
@@ -182,14 +191,16 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             makeRect(0, 0, 2, 2),
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
-        expect(frames[0]).toEqual({ tileId: 0, duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 2, duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 4, duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 6, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0, duration: 500 },
+            { tileId: 2, duration: 500 },
+            { tileId: 4, duration: 500 },
+            { tileId: 6, duration: 500 },
+        ]);
     });
 
     test("group3 rect2 (8 col, 2x2 sel): Both fills row then wraps", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const cfg = TILESETS.group3.rect2;
         const tile = makeTile(0);
         const frames = get_tile_frames(
@@ -198,16 +209,18 @@ describe("integration: get_tile_frames with real tileset layouts", () => {
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th)
         );
         // cells_per_row = 4, no wrap for 4 frames
-        expect(frames[0]).toEqual({ tileId: 0, duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 2, duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 4, duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 6, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0, duration: 500 },
+            { tileId: 2, duration: 500 },
+            { tileId: 4, duration: 500 },
+            { tileId: 6, duration: 500 },
+        ]);
     });
 });
 
 describe("integration: stride with real tileset layouts", () => {
     test("rect2 (12 col, 3x2 sel, horizontal=1): Right stride = 3 + 1 = 4", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const cfg = TILESETS.group1.rect2;
         const tile = makeTile(0);
         const frames = get_tile_frames(
@@ -216,13 +229,15 @@ describe("integration: stride with real tileset layouts", () => {
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th),
             makeStride(1)
         );
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 4,  duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 8,  duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 4,  duration: 500 },
+            { tileId: 8,  duration: 500 },
+        ]);
     });
 
     test("rect1 (6 col, 3x2 sel, vertical=1): Down stride = 6 * (2 + 1) = 18", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const cfg = TILESETS.group1.rect1;
         const tile = makeTile(0);
         const frames = get_tile_frames(
@@ -231,13 +246,15 @@ describe("integration: stride with real tileset layouts", () => {
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th),
             makeStride(0, 1)
         );
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 18, duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 36, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 18, duration: 500 },
+            { tileId: 36, duration: 500 },
+        ]);
     });
 
     test("square (9 col, 3x2 sel): Both with horizontal stride wraps to next row", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const cfg = TILESETS.group1.square;
         const tile = makeTile(0);
         const frames = get_tile_frames(
@@ -247,13 +264,15 @@ describe("integration: stride with real tileset layouts", () => {
             makeStride(3, 0)
         );
         // h_advance = 6, cells_per_row = 2
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 6,  duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 18, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 6,  duration: 500 },
+            { tileId: 18, duration: 500 },
+        ]);
     });
 
     test("group1 rect2 (12 col, 2x2 sel): horizontal stride on tileset", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const cfg = TILESETS.group1.rect2;
         const tile = makeTile(0);
         const frames = get_tile_frames(
@@ -262,16 +281,18 @@ describe("integration: stride with real tileset layouts", () => {
             makeTilesetDimensions(cfg.cols, cfg.rows, cfg.tw, cfg.th),
             makeStride(1)
         );
-        expect(frames[0]).toEqual({ tileId: 0,  duration: 500 });
-        expect(frames[1]).toEqual({ tileId: 3,  duration: 500 });
-        expect(frames[2]).toEqual({ tileId: 6,  duration: 500 });
-        expect(frames[3]).toEqual({ tileId: 9, duration: 500 });
+        expect(frames).toEqual([
+            { tileId: 0,  duration: 500 },
+            { tileId: 3,  duration: 500 },
+            { tileId: 6,  duration: 500 },
+            { tileId: 9, duration: 500 },
+        ]);
     });
 });
 
 describe("integration: frame_count edge cases with real tilesets", () => {
     test("frame_count=0 returns empty array", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const tile = makeTile(0);
         const frames = get_tile_frames(
             tile, 0, 100, AnimationDirection.Right,
@@ -282,35 +303,36 @@ describe("integration: frame_count edge cases with real tilesets", () => {
     });
 
     test("frame_count=1 returns single frame", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const tile = makeTile(42);
         const frames = get_tile_frames(
             tile, 1, 100, AnimationDirection.Down,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(12, 9, 32, 32)
         );
-        expect(frames).toHaveLength(1);
-        expect(frames[0]).toEqual({ tileId: 42, duration: 100 });
+        expect(frames).toEqual([
+            { tileId: 42, duration: 100 },
+        ]);
     });
 
     test("large frame_count works correctly", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const tile = makeTile(0);
         const frames = get_tile_frames(
             tile, 20, 500, AnimationDirection.Right,
             makeRect(0, 0, 3, 2),
             makeTilesetDimensions(100, 10, 32, 32)
-        );
+        )!;
         expect(frames).toHaveLength(20);
-        expect(frames[0].tileId).toBe(0);
-        expect(frames[19].tileId).toBe(57);
+        expect(frames[0]!.tileId).toBe(0);
+        expect(frames[19]!.tileId).toBe(57);
     });
 });
 
 describe("integration: consistency across tileset variants", () => {
     // The same 3x2 selection should produce the same Right stride regardless of tileset width
     test("3x2 selection produces width=3 Right stride across all column widths", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const tilesetColumnWidths = [4, 6, 8, 9, 12];
         const tile = makeTile(0);
         const sel = makeRect(0, 0, 3, 2);
@@ -321,39 +343,38 @@ describe("integration: consistency across tileset variants", () => {
                 tile, 2, 100, AnimationDirection.Right,
                 sel,
                 makeTilesetDimensions(cols, rows, 32, 32)
-            );
-            expect(frames[0].tileId).toBe(0);
-            expect(frames[1].tileId).toBe(3);
+            )!;
+            expect(frames.map(f => f.tileId)).toEqual([0, 3]);
         }
     });
 
     // Down stride changes with tileset column count
     test("3x2 selection Down stride scales with columns", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const tile = makeTile(0);
         const sel = makeRect(0, 0, 3, 2);
 
-        const frames6 = get_tile_frames(tile, 3, 100, AnimationDirection.Down, sel, makeTilesetDimensions(6, 15, 32, 32));
-        const frames12 = get_tile_frames(tile, 3, 100, AnimationDirection.Down, sel, makeTilesetDimensions(12, 9, 32, 32));
+        const frames6 = get_tile_frames(tile, 3, 100, AnimationDirection.Down, sel, makeTilesetDimensions(6, 15, 32, 32))!;
+        const frames12 = get_tile_frames(tile, 3, 100, AnimationDirection.Down, sel, makeTilesetDimensions(12, 9, 32, 32))!;
 
         // 6 cols: stride = 6*2 = 12  → 0, 12, 24
         // 12 cols: stride = 12*2 = 24 → 0, 24, 48
-        expect(frames6[1].tileId).toBe(12);
-        expect(frames12[1].tileId).toBe(24);
+        expect(frames6[1]!.tileId).toBe(12);
+        expect(frames12[1]!.tileId).toBe(24);
     });
 
     // Stride should work identically regardless of tile size
     test("stride behavior is independent of tile dimensions", async () => {
-        const { get_tile_frames } = await getIndexModule();
+        const { get_tile_frames, AnimationDirection } = await getIndexModule();
         const tile = makeTile(0);
         const sel = makeRect(0, 0, 2, 2);
         const st = makeStride(1);
 
-        const frames16 = get_tile_frames(tile, 3, 100, AnimationDirection.Right, sel, makeTilesetDimensions(8, 10, 16, 16), st);
-        const frames32 = get_tile_frames(tile, 3, 100, AnimationDirection.Right, sel, makeTilesetDimensions(8, 10, 32, 32), st);
+        const frames16 = get_tile_frames(tile, 3, 100, AnimationDirection.Right, sel, makeTilesetDimensions(8, 10, 16, 16), st)!;
+        const frames32 = get_tile_frames(tile, 3, 100, AnimationDirection.Right, sel, makeTilesetDimensions(8, 10, 32, 32), st)!;
 
         // stride = 2 + 1 = 3, independent of tile width/height
-        expect(frames16[1].tileId).toBe(3);
-        expect(frames32[1].tileId).toBe(3);
+        expect(frames16[1]!.tileId).toBe(3);
+        expect(frames32[1]!.tileId).toBe(3);
     });
 });
