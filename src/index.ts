@@ -15,7 +15,7 @@ const last_used = {
     stride_vertical: 0
 };
 
-enum AnimationDirection {
+export enum AnimationDirection {
     Right,
     Down,
     Both
@@ -128,7 +128,7 @@ function animation_create() {
             horizontal: result.animation_stride_horizontal.value,
             vertical: result.animation_stride_vertical.value
         };
-        if (direction === undefined) {
+        if (!directions.includes(direction)) {
             tiled.alert("No direction selected. (This should not occur)");
             return;
         }

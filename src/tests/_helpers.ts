@@ -1,9 +1,3 @@
-export enum AnimationDirection {
-    Right,
-    Down,
-    Both
-}
-
 (globalThis as any).tiled = {
     activeAssetChanged: { connect: () => {} },
     registerAction: () => ({} as any),
@@ -71,8 +65,13 @@ export function makeStride(horizontal = 0, vertical = 0) {
     return { horizontal, vertical };
 }
 
-let _mod: any = null;
-export async function getIndexModule() {
+// Typed so that test call sites are checked against the real signatures.
+// The import is deferred because index.ts runs on evaluation and needs the
+// mocks above to already be in place.
+type IndexModule = typeof import("../index");
+
+let _mod: IndexModule | null = null;
+export async function getIndexModule(): Promise<IndexModule> {
     if (!_mod) _mod = await import("../index");
     return _mod;
 }
